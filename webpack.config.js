@@ -80,7 +80,7 @@ module.exports = {
   //mode: 'production',
   mode: "development",
 
-  //开发服务器devServer:用来自动化(自动编译,自动打开浏览器,自动刷新浏览器~!).有一个特点:只会在内存中编译打包,不会对本地代码有任何的输出
+  //开发服务器devServer:用来自动化(自动编译,自动打开浏览器,自动刷新浏览器~!).有一个特点:只会在内存中编译打包,不会对有任何的输出(就是不会编译成build文件夹输出)
   //启动devServer指令为:npx webpack-dev-server
   devServer: {
     contentBase: resolve(__dirname, "build"), //代表我要运行项目的目录,这里呢一般也是写一个绝对路径(目录是编译后的目录,不是源代码的目录)
