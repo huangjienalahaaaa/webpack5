@@ -47,10 +47,11 @@ module.exports = {
         //处理图片资源.但是这种方式有一个问题:处理不了html中的图片,所以下面还得加一个html-loader(但是这种方式会出现一个问题:[object Module],解决方法:关闭url-loader的es6模块化,使用commonjs解析!!但是我没有出现这个情况!!!!)
         test: /\.(jpg|png|gif)$/,
         //如果只使用一个loader,那么就可以直接写loader,那么这个loader的配置就可以使用那面的options来配置
-        loader: "url-loader",
+        loader: "url-loader", //但是这里要下载2个包,url-loader以及file-loader
         options: {
           limit: 8 * 1024, //图片大小小于8kb,就会被base64处理(base64处理的优点:减少页面请求数量(减轻服务器压力).但是同样也存在缺点:缺点就是图片体积会更大(文件请求速度会慢一些))
-          esModule: false //关闭解决上面的问题,虽然我没有这个问题(关闭url-loader的es6模块化,使用commonjs解析)
+          esModule: false, //关闭解决上面的问题,虽然我没有这个问题(关闭url-loader的es6模块化,使用commonjs解析)
+          name: "[hash:10].[ext]" //给文件取名字:[hash:10]取文件的hash的前10位,[ext]取文件原来扩展名
         }
       },
       {
@@ -58,6 +59,12 @@ module.exports = {
         //html-loader是用来处理html文件中的img图片(负责引入img,从而能被url-loader进行处理)
         loader: "html-loader"
       }
+      //   {
+      //     //打包其他资源(除了html/js/css资源以外的资源,所以下面用exclude来排除这些资源)
+      //     // 注意:这里的实例是用阿里云的图标,这里用到的时候自己再看,我这边没有写案例
+      //     exclude: /\.(css|js|html)$/, //排除html/js/css资源,
+      //     loader: "file-loader"
+      //   }
     ]
   },
   plugins: [
@@ -71,5 +78,14 @@ module.exports = {
   ],
   //  模式
   //mode: 'production',
-  mode: "development"
+  mode: "development",
+
+  //开发服务器devServer:用来自动化(自动编译,自动打开浏览器,自动刷新浏览器~!).有一个特点:只会在内存中编译打包,不会对本地代码有任何的输出
+  //启动devServer指令为:npx webpack-dev-server
+  devServer: {
+    contentBase: resolve(__dirname, "build"), //代表我要运行项目的目录,这里呢一般也是写一个绝对路径(目录是编译后的目录,不是源代码的目录)
+    compress: true, //启动gzip压缩,从而我们的代码体积更小,运行更快
+    open: true,
+    port: 3000 //开发服务器的端口号
+  }
 };
