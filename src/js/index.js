@@ -2,7 +2,7 @@
  ---------------第一节---------
 
  */
-import "../css/index.css";
+import '../css/index.css';
 
 function add(x, y) {
   return x + y;

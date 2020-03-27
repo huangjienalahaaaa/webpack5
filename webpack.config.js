@@ -20,6 +20,21 @@ css兼容性处理:
   * 使用postcss这个库:
     但是postcss要想在webpack中使用的话,得使用postcss-loader以及一个插件postcss-preset-env(这个插件能够帮助postcss识别某个环境,而加载制定的配置,能让我们的兼容性精确到某一个浏览器的版本)
   * 在module的css这个rule中进行配置.
+----------第五节--------------------
+1. 可以看到:webpack有的工作会使用loader来做,有的工作呢会使用plugins来做.有个明显的规律就是:loader做事比较少,大部分工作都是靠插件plugins来完成,尤其是压缩啊这些东西,都是靠插件来完成的.而兼容性处理这些东西,是靠loader来完成
+
+2. 压缩CSS:
+  * 使用插件:optimize-css-assets-webpack-plugin
+
+
+----------第六节--------------------
+js语法检查:
+  * 使用eslint-loader这个插件.但是这个依赖与eslint这个库,所以我们要下载这2个东西.
+  * 语法检查只检查自己写的代码,第三方库(node_modules)是不检查的
+  * 
+  * 
+  * 
+  * 
  */
 
 const { resolve } = require("path");
@@ -27,6 +42,8 @@ const { resolve } = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 // 提取CSS成单独文件:
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+// 压缩CSS:
+const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 
 // 设置nodejs环境变量
 process.env.NODE_ENV = "development";
@@ -79,6 +96,16 @@ module.exports = {
           name: "[hash:10].[ext]",
           outputPath: "media" //编译后将其他资源放在media目录下
         }
+      },
+      {
+        //语法检查,下面的配置配置完之后,还得写检查规则(这个去package.json中eslintConfig中设置~),且这里的规则我们推荐使用airbnb规则(为什么我们推荐使用airbnb规则呢?我们可以去github->Exolore->Topics->Javascript中选择airbnb / javascript查看风格指南,他会告诉你很多你该如何去写js代码,且可以在这个页面中可以看到这个页面是有中文翻译的),这里我们使用的是eslint-config-airbnb-base这个插件.但是这个插件,它还依赖于eslint-plugin-import和eslint这两个库,所以我们要下载3个库,这里我们不使用eslint,要使用的话看视频
+        test: /\.js$/, //只检查js代码
+        exclude: /node_modules/, //排除第三方库
+        loader: "eslint-loader",
+        options: {
+          //自动修复eslint错误
+          fix: true
+        }
       }
     ]
   },
@@ -88,7 +115,8 @@ module.exports = {
     }),
     new MiniCssExtractPlugin({
       filename: "css/buid.css" //指定css的输出路径以及重命名
-    })
+    }),
+    new OptimizeCssAssetsPlugin() //压缩CSS
   ],
 
   mode: "development",
