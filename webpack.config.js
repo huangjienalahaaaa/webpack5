@@ -22,16 +22,14 @@ css兼容性处理:
   * 在module的css这个rule中进行配置.
  */
 
-const {
-  resolve
-} = require("path");
+const { resolve } = require("path");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 // 提取CSS成单独文件:
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 // 设置nodejs环境变量
-process.env.NODE_ENV = 'development'
+process.env.NODE_ENV = "development";
 
 module.exports = {
   entry: "./src/js/index.js",
@@ -40,7 +38,8 @@ module.exports = {
     path: resolve(__dirname, "build")
   },
   module: {
-    rules: [{
+    rules: [
+      {
         test: /\.css$/,
         use: [
           // "style-loader", //创建style标签,讲样式放入.但是这里要将css荣js文件中拿出来,所以这个loader我们就不要了,使用下面的MiniCssExtractPlugin,它其中有专门的.loader来处理
@@ -51,10 +50,10 @@ module.exports = {
             loader: "postcss-loader",
             options: {
               ident: "postcss",
-              plugins: () => {
+              plugins: () => [
                 //postcss的插件->使用postcss-preset-env(!!!这个插件是用来:帮助postcss找到package.json中browserslist里面的配置,通过配置加载指定的css兼容性样式.所以接下来我们要去package.json中去写browserslist:但是package.json中是不能注释的,所以写在了learnImg中的1.png中)
-                require("postcss-preset-env")();
-              }
+                require("postcss-preset-env")()
+              ]
             }
           }
         ]
