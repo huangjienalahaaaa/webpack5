@@ -17,7 +17,10 @@
         * 生产环境比开发环境多一个压缩js代码的功能
 
  */
-import '../css/index.css';
+import "../css/index.css";
+
+// 检验js兼容性
+// import "@babel/polyfill";
 
 function add(x, y) {
   return x + y;
@@ -27,8 +30,17 @@ function add(x, y) {
 // eslint-disable-next-line
 console.log(add(1, 2));
 
-// 检验js兼容性
-const add2 = (x, y) => {
+// １．检验js兼容性 -> @babel/preset-env部分
+const aa = (x, y) => {
   return x + y;
 };
-console.log(add2(1, 2))
+console.log(aa(1, 2));
+
+// ２．检验js兼容性 -> @babel/polyfill部分/core-js按需加载
+const promise = new Promise(resolve => {
+  setTimeout(() => {
+    console.log("定时器ok了");
+    resolve();
+  }, 1000);
+});
+console.log(promise);

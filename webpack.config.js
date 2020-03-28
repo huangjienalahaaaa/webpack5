@@ -33,14 +33,19 @@ js语法检查:
   * 语法检查只检查自己写的代码,第三方库(node_modules)是不检查的
   
 ----------第七节--------------------
-js兼容性处理(将es6语法转化为es5以及以下的语法):
-  * 使用:babel-loader(这里还要下载@babel/core,@babel/preset-env这两个库一起下载)
-  
+js兼容性处理(将es6语法转化为es5以及以下的语法)!!!!!!
+  * 使用:babel-loader(这里还要下载@babel/core,@babel/preset-env这两个库一起下载)：
+    １．　基本js兼容性处理－＞@babel/preset-env
+    ２．　全部js兼容性处理－＞＠babel/polyfill:
+        １：＠babel/polyfill 如何使用：安装完之后，只要在文件中引入即可使用，比如我们这边在js/index中import '@babel/polyfill'．这样引入，就可以在文件下面使用了．
+        ２：但是ｗｅｂpack打包之后，你会发现构建好的build.js这个文件特别特别大大，因为＠babel/polyfill 会将ｅｓ6转换为es5的库全部都拿进来．
+        3:从第二天我们可以看出使用这个插件会有一个问题:我只要解决部分兼容性问题，但是将所有兼容性代码全部引入，体积太大了～！所以我们引入下面第三种解决方案
+    ３．需要做兼容性处理的就做：按需加载！！！->这里我们用到core-js这个库:
+         * 这个库下载完之后，我们继续在其rules的presets里做相应的配置．
+         * 注意，如果我们要使用第三种方案的话，就不能使用第二种方案，那么就要把src/index.js中的＂import '@babel/polyfill＂  给去掉
  */
 
-const {
-  resolve
-} = require("path");
+const { resolve } = require("path");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 // 提取CSS成单独文件:
@@ -58,7 +63,8 @@ module.exports = {
     path: resolve(__dirname, "build")
   },
   module: {
-    rules: [{
+    rules: [
+      {
         test: /\.css$/,
         use: [
           // "style-loader", //创建style标签,讲样式放入.但是这里要将css荣js文件中拿出来,所以这个loader我们就不要了,使用下面的MiniCssExtractPlugin,它其中有专门的.loader来处理
@@ -99,15 +105,6 @@ module.exports = {
           outputPath: "media" //编译后将其他资源放在media目录下
         }
       },
-      {
-        //js兼容性处理
-        test: /\.js$/,
-        exclude: /node_modules/, //防止将第三方插件处理了
-        loader: "babel-loader",
-        options: {
-          presets: ["@babel/preset-env"] //presets -> 预设,指示babel做怎么样的兼容性处理
-        }
-      }
       // {
       //   //语法检查,下面的配置配置完之后,还得写检查规则(这个去package.json中eslintConfig中设置~),且这里的规则我们推荐使用airbnb规则(为什么我们推荐使用airbnb规则呢?我们可以去github->Exolore->Topics->Javascript中选择airbnb / javascript查看风格指南,他会告诉你很多你该如何去写js代码,且可以在这个页面中可以看到这个页面是有中文翻译的),这里我们使用的是eslint-config-airbnb-base这个插件.但是这个插件,它还依赖于eslint-plugin-import和eslint这两个库,所以我们要下载3个库,但是这里我不使用eslint,所以想用的时候把下面的注释给删了就行
       //   test: /\.js$/, //只检查js代码
@@ -117,7 +114,35 @@ module.exports = {
       //     fix: true //自动修复eslint错误
       //   }
       // },
-
+      {
+        //js兼容性处理
+        test: /\.js$/,
+        exclude: /node_modules/, //防止将第三方插件处理了
+        loader: "babel-loader",
+        options: {
+          presets: [
+            [
+              "@babel/preset-env", //presets -> 预设,指示babel做怎么样的兼容性处理
+              {
+                //core-js按需加载部分
+                useBuiltIns: "usage", //表示按需加载
+                // 指定按需加载的库
+                corejs: {
+                  version: 3 //指定corejs版本为第三个版本
+                },
+                //指定兼容性做到哪个版本浏览器
+                targets: {
+                  chrome: "60",
+                  firefox: "60",
+                  ie: "9",
+                  safari: "10",
+                  edge: "17"
+                }
+              }
+            ]
+          ]
+        }
+      }
     ]
   },
   plugins: [
