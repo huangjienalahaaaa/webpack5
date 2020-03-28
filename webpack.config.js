@@ -1,6 +1,9 @@
 /*
 --------第1节-------------------
-
+1. 比如下面的eslint和babel-loader插件都是要对js文件进行处理,而正常来讲,一个文件只能被一个Loader处理:
+  那么当一个文件要被多个loader处理,那么一定要指定loader执行的先后顺序:
+    这里必须要先执行eslint进行语法检查,再执行babel转换,那么如何保证这个顺序呢???:
+      * 在eslint-loader中再加入一个属性:enforce:'pre'->优先执行的意思,就是加了这个属性后,所有的loader,一定是这个loader先执行,不管它是放在上面还是下面
   */
 
 const {
@@ -11,7 +14,27 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 
-process.env.NODE_ENV = "development";
+
+process.env.NODE_ENV = "production"; //这里应该要改为production了
+
+
+
+
+
+// 因为css和less的use中的有些loader是重复的,所以我们这里定义复用loader,css和less中的use利用三点运算符...commonCssLoader引入即可
+const commonCssLoader = [
+  MiniCssExtractPlugin.loader,
+  "css-loader",
+  {
+    loader: "postcss-loader",
+    options: {
+      ident: "postcss",
+      plugins: () => [
+        require("postcss-preset-env")()
+      ]
+    }
+  }
+]
 
 module.exports = {
   entry: "./src/js/index.js",
@@ -22,20 +45,13 @@ module.exports = {
   module: {
     rules: [{
         test: /\.css$/,
+        use: [...commonCssLoader]
+      },
+      {
+        test: /\.less$/,
         use: [
-
-          MiniCssExtractPlugin.loader,
-          "css-loader",
-          {
-
-            loader: "postcss-loader",
-            options: {
-              ident: "postcss",
-              plugins: () => [
-                require("postcss-preset-env")()
-              ]
-            }
-          }
+          ...commonCssLoader,
+          "less-loader"
         ]
       },
       {
@@ -60,7 +76,16 @@ module.exports = {
           outputPath: "media"
         }
       },
-      {
+      { //eslint语法检查
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: "eslint-loader",
+        enforce: 'pre', //优先执行
+        options: {
+          fix: true
+        }
+      },
+      { //babel转换
         test: /\.js$/,
         exclude: /node_modules/,
         loader: "babel-loader",
@@ -104,7 +129,7 @@ module.exports = {
     new OptimizeCssAssetsPlugin()
   ],
 
-  mode: "development",
+  mode: 'production', //这里应该要改为production了
 
   devServer: {
     contentBase: resolve(__dirname, "build"),
