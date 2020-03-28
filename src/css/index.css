@@ -1,6 +1,12 @@
 body {
-  background-color: pink;
+  background-color: yellow;
 
   display: flex;
   backface-visibility: hidden;
+}
+
+.block {
+  width: 600px;
+  height: 200px;
+  background-color: red;
 }
