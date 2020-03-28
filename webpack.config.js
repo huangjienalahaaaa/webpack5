@@ -31,13 +31,16 @@ css兼容性处理:
 js语法检查:
   * 使用eslint-loader这个插件.但是这个依赖与eslint这个库,所以我们要下载这2个东西.
   * 语法检查只检查自己写的代码,第三方库(node_modules)是不检查的
-  * 
-  * 
-  * 
-  * 
+  
+----------第七节--------------------
+js兼容性处理(将es6语法转化为es5以及以下的语法):
+  * 使用:babel-loader(这里还要下载@babel/core,@babel/preset-env这两个库一起下载)
+  
  */
 
-const { resolve } = require("path");
+const {
+  resolve
+} = require("path");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 // 提取CSS成单独文件:
@@ -55,8 +58,7 @@ module.exports = {
     path: resolve(__dirname, "build")
   },
   module: {
-    rules: [
-      {
+    rules: [{
         test: /\.css$/,
         use: [
           // "style-loader", //创建style标签,讲样式放入.但是这里要将css荣js文件中拿出来,所以这个loader我们就不要了,使用下面的MiniCssExtractPlugin,它其中有专门的.loader来处理
@@ -98,15 +100,24 @@ module.exports = {
         }
       },
       {
-        //语法检查,下面的配置配置完之后,还得写检查规则(这个去package.json中eslintConfig中设置~),且这里的规则我们推荐使用airbnb规则(为什么我们推荐使用airbnb规则呢?我们可以去github->Exolore->Topics->Javascript中选择airbnb / javascript查看风格指南,他会告诉你很多你该如何去写js代码,且可以在这个页面中可以看到这个页面是有中文翻译的),这里我们使用的是eslint-config-airbnb-base这个插件.但是这个插件,它还依赖于eslint-plugin-import和eslint这两个库,所以我们要下载3个库,这里我们不使用eslint,要使用的话看视频
-        test: /\.js$/, //只检查js代码
-        exclude: /node_modules/, //排除第三方库
-        loader: "eslint-loader",
+        //js兼容性处理
+        test: /\.js$/,
+        exclude: /node_modules/, //防止将第三方插件处理了
+        loader: "babel-loader",
         options: {
-          //自动修复eslint错误
-          fix: true
+          presets: ["@babel/preset-env"] //presets -> 预设,指示babel做怎么样的兼容性处理
         }
       }
+      // {
+      //   //语法检查,下面的配置配置完之后,还得写检查规则(这个去package.json中eslintConfig中设置~),且这里的规则我们推荐使用airbnb规则(为什么我们推荐使用airbnb规则呢?我们可以去github->Exolore->Topics->Javascript中选择airbnb / javascript查看风格指南,他会告诉你很多你该如何去写js代码,且可以在这个页面中可以看到这个页面是有中文翻译的),这里我们使用的是eslint-config-airbnb-base这个插件.但是这个插件,它还依赖于eslint-plugin-import和eslint这两个库,所以我们要下载3个库,但是这里我不使用eslint,所以想用的时候把下面的注释给删了就行
+      //   test: /\.js$/, //只检查js代码
+      //   exclude: /node_modules/, //排除第三方库
+      //   loader: "eslint-loader",
+      //   options: {
+      //     fix: true //自动修复eslint错误
+      //   }
+      // },
+
     ]
   },
   plugins: [
