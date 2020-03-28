@@ -26,8 +26,12 @@ webpack性能优化介绍:
       3.html文件:修改Html文件,会发现跟修改js文件一样,是没有HRM功能的.同时会导致问题:html文件不能热更新了(既html文件修改了,不能自动更新html页面了)!!!!!
     * 如何解决上述html不能热更新问题-> 把html的入口文件加入到module.exports中的entry选项中即可.
       上面这条解决了html不能热更新的问题,但是此时HRM功能html还是不支持的,怎么办呢??-> 因为开发的时候只会生产出一个html文件的,所以一个变化就是所有的变化,所以也不需要HRM这个功能.
-   
 
+
+* 2. 解决开发环境下如何去调试代码->source-map:
+      1.souce-map是什么呢??请看README.md中的这块部分.
+      2.souce-map如何实现?? 只需要在这个文件下面加入一句话:devtool:'source-map'即可.然后执行webpack指令,它就会生成一个文件(在build/js/build.js.map文件)
+      3.devtool:'source-map'只是source-map最基本的配置,它还有别的配置,请看README.md中对应的内容.注意:这里之后的具体使用请看视频,我这边值做笔记!!!
 */
 
 const {
@@ -161,5 +165,6 @@ module.exports = {
     open: true,
     port: 3000,
     hot: true //开启HMR热模块替换功能
-  }
+  },
+  devtool: 'eval-source-map' //souce-map技术
 };
