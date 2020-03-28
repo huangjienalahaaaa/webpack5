@@ -43,9 +43,19 @@ js兼容性处理(将es6语法转化为es5以及以下的语法)!!!!!!
     ３．需要做兼容性处理的就做：按需加载！！！->这里我们用到core-js这个库:
          * 这个库下载完之后，我们继续在其rules的presets里做相应的配置．
          * 注意，如果我们要使用第三种方案的话，就不能使用第二种方案，那么就要把src/index.js中的＂import '@babel/polyfill＂  给去掉
- */
 
-const { resolve } = require("path");
+   
+----------第八节--------------------   
+压缩html与js
+1.js压缩:
+  js压缩就是将下面的mode:"development"改为"production"也就是将开发环境变为生产环境即可,因为生产环境会自动压缩代码
+2.html压缩:
+    在下面的HtmlWebpackPlugin插件中填写minify选项即可.
+  */
+
+const {
+  resolve
+} = require("path");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 // 提取CSS成单独文件:
@@ -63,8 +73,7 @@ module.exports = {
     path: resolve(__dirname, "build")
   },
   module: {
-    rules: [
-      {
+    rules: [{
         test: /\.css$/,
         use: [
           // "style-loader", //创建style标签,讲样式放入.但是这里要将css荣js文件中拿出来,所以这个loader我们就不要了,使用下面的MiniCssExtractPlugin,它其中有专门的.loader来处理
@@ -147,7 +156,11 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./src/index.html"
+      template: "./src/index.html",
+      minify: { //压缩html代码
+        collapseWhitespace: true, //移除空格
+        removeComments: true //移除注释
+      }
     }),
     new MiniCssExtractPlugin({
       filename: "css/buid.css" //指定css的输出路径以及重命名
@@ -155,7 +168,7 @@ module.exports = {
     new OptimizeCssAssetsPlugin() //压缩CSS
   ],
 
-  mode: "development",
+  mode: "development", //生产环境(production)会自动压缩js代码
 
   devServer: {
     contentBase: resolve(__dirname, "build"),
