@@ -72,7 +72,9 @@
         * 方法三.通过js代码,让某个文件单独打包成一个chunk:
             这个方法,看src/js/index.js
 
-
+    3.一般情况下:都是
+        1. 使用单入口配置+然后结合optization配置.能保证使得node_modules中的代码单独打包成一个chunk,然后将公共文件也单独打包成一个chunk
+        2. 其次我希望其他的文件也要打包成单独的chunk,就使用第三种方法,通过js代码的方法.
  */
 const {
     resolve
@@ -209,12 +211,11 @@ module.exports = {
 
     *我们将来开发的时候,还是单页面应用比较多,多入口的话还是少一点的.但是如果我们使用单入口的话,只能做上面的第一件事情,就是只能单独打包node_modules为一个chunk,但是第二件事情就做不了了,既不能提取公共的文件.这时候该怎么办??通过第三种方式.
     */
-    // "optization": {
-    //     spliteChunks: {
-    //         chunks: 'all'
-    //     }
-    // },
-
+    optimization: {
+        splitChunks: {
+            chunks: 'all'
+        }
+    },
 
     mode: "production", //这里应该要改为production了
 
