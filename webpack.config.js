@@ -15,7 +15,7 @@ webpack性能优化介绍:
     * HMR:hot module replacement 热模块替换/模块热替换:
       那么如何实现呢?????->非常简单:只需要在下面devServer{}选项中,写如一条"hot:true"即可.
       修改完之后,要注意:"当修改了webpack配置,新配置要想生效,必须重新重新启动webpack服务",所以按ctrl+c,然后重新执行npx webpack-dev-server命令.:
-    * 注意,因为这里npx webpack-dev-server这个命令是在开发环境使用的,所以在西面的commobCssLoader中的 MiniCssExtractPlugin.loader要改"styel-loader",不然的话是不会实时刷新的,MiniCssExtractPlugin.loade是在生产环境下再改回来,这里的开发环境要用style-loader:
+    * 注意,因为这里npx webpack-dev-server这个命令是在开发环境使用的,所以在提取出来的公共的的commonCssLoader中的 MiniCssExtractPlugin.loader要改"styel-loader",不然的话是不会实时刷新的,MiniCssExtractPlugin.loade是在生产环境下再改回来,这里的开发环境要用style-loader:
     测试此时可知:
       1.样式文件:可以使用HMR功能:因为style-loader内部实现了,也就是上面的注意.!!这也就是为什么我们开发环境用的是style-loader,而生产环境得提取单个文件.因为开发环境我们使用style-loader,可以让我们性能更好,打包速度更快.但是上线的时候我们得考虑性能的优化.
 
@@ -35,7 +35,7 @@ webpack性能优化介绍:
 */
 
 const {
-  resolve
+    resolve
 } = require("path");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
@@ -51,120 +51,120 @@ process.env.NODE_ENV = "development"; //这里应该要改为production了
 
 // 因为css和less的use中的有些loader是重复的,所以我们这里定义复用loader,css和less中的use利用三点运算符...commonCssLoader引入即可
 const commonCssLoader = [
-  "style-loader",
-  "css-loader",
-  {
-    loader: "postcss-loader",
-    options: {
-      ident: "postcss",
-      plugins: () => [
-        require("postcss-preset-env")()
-      ]
+    "style-loader",
+    "css-loader",
+    {
+        loader: "postcss-loader",
+        options: {
+            ident: "postcss",
+            plugins: () => [
+                require("postcss-preset-env")()
+            ]
+        }
     }
-  }
 ]
 
 module.exports = {
-  entry: ["./src/js/index.js", "./src/index.html"],
-  output: {
-    filename: "js/build.js",
-    path: resolve(__dirname, "build")
-  },
-  module: {
-    rules: [{
-        test: /\.css$/,
-        use: [...commonCssLoader]
-      },
-      {
-        test: /\.less$/,
-        use: [
-          ...commonCssLoader,
-          "less-loader"
-        ]
-      },
-      {
-        test: /\.(jpg|png|gif)$/,
-        loader: "url-loader",
-        options: {
-          limit: 8 * 1024,
-          esModule: false,
-          name: "[hash:10].[ext]",
-          outputPath: "imgs"
-        }
-      },
-      {
-        test: /\.html$/,
-        loader: "html-loader"
-      },
-      {
-        exclude: /\.(css|js|html|less|jpg|png|gif)$/,
-        loader: "file-loader",
-        options: {
-          name: "[hash:10].[ext]",
-          outputPath: "media"
-        }
-      },
-      // { //eslint语法检查
-      //   test: /\.js$/,
-      //   exclude: /node_modules/,
-      //   loader: "eslint-loader",
-      //   enforce: 'pre', //优先执行
-      //   options: {
-      //     fix: true
-      //   }
-      // },
-      { //babel转换
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: "babel-loader",
-        options: {
-          presets: [
-            [
-              "@babel/preset-env",
-              {
-
-                useBuiltIns: "usage",
-
-                corejs: {
-                  version: 3
-                },
-
-                targets: {
-                  chrome: "60",
-                  firefox: "60",
-                  ie: "9",
-                  safari: "10",
-                  edge: "17"
+    entry: ["./src/js/index.js", "./src/index.html"],
+    output: {
+        filename: "js/build.js",
+        path: resolve(__dirname, "build")
+    },
+    module: {
+        rules: [{
+                test: /\.css$/,
+                use: [...commonCssLoader]
+            },
+            {
+                test: /\.less$/,
+                use: [
+                    ...commonCssLoader,
+                    "less-loader"
+                ]
+            },
+            {
+                test: /\.(jpg|png|gif)$/,
+                loader: "url-loader",
+                options: {
+                    limit: 8 * 1024,
+                    esModule: false,
+                    name: "[hash:10].[ext]",
+                    outputPath: "imgs"
                 }
-              }
-            ]
-          ]
-        }
-      }
-    ]
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: "./src/index.html",
-      minify: {
-        collapseWhitespace: true,
-        removeComments: true
-      }
-    }),
-    new MiniCssExtractPlugin({
-      filename: "css/buid.css"
-    }),
-    new OptimizeCssAssetsPlugin()
-  ],
+            },
+            {
+                test: /\.html$/,
+                loader: "html-loader"
+            },
+            {
+                exclude: /\.(css|js|html|less|jpg|png|gif)$/,
+                loader: "file-loader",
+                options: {
+                    name: "[hash:10].[ext]",
+                    outputPath: "media"
+                }
+            },
+            // { //eslint语法检查
+            //   test: /\.js$/,
+            //   exclude: /node_modules/,
+            //   loader: "eslint-loader",
+            //   enforce: 'pre', //优先执行
+            //   options: {
+            //     fix: true
+            //   }
+            // },
+            { //babel转换
+                test: /\.js$/,
+                exclude: /node_modules/,
+                loader: "babel-loader",
+                options: {
+                    presets: [
+                        [
+                            "@babel/preset-env",
+                            {
 
-  mode: 'development', //这里应该要改为production了
+                                useBuiltIns: "usage",
 
-  devServer: {
-    contentBase: resolve(__dirname, "build"),
-    compress: true,
-    open: true,
-    port: 3000,
-    hot: true //开启HMR热模块替换功能
-  },
-  devtool: 'eval-source-map' //souce-map技术
+                                corejs: {
+                                    version: 3
+                                },
+
+                                targets: {
+                                    chrome: "60",
+                                    firefox: "60",
+                                    ie: "9",
+                                    safari: "10",
+                                    edge: "17"
+                                }
+                            }
+                        ]
+                    ]
+                }
+            }
+        ]
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: "./src/index.html",
+            minify: {
+                collapseWhitespace: true,
+                removeComments: true
+            }
+        }),
+        new MiniCssExtractPlugin({
+            filename: "css/buid.css"
+        }),
+        new OptimizeCssAssetsPlugin()
+    ],
+
+    mode: 'development', //这里应该要改为production了
+
+    devServer: {
+        contentBase: resolve(__dirname, "build"),
+        compress: true,
+        open: true,
+        port: 3000,
+        hot: true //开启HMR热模块替换功能
+    },
+    devtool: 'eval-source-map' //souce-map技术
 };
