@@ -90,8 +90,19 @@
 
     3.那么如何使用PWA技术呢? 通过'workbox'来实现,当然在webapck中,是通过'workbox-webpack-plugin'插件来实现的.
     4.接下去如何去使用请看视频,因为平时我没用到.
+-----------第七节:-------------------
+* 多进程打包:
+
+    1.首先下载thread-loader :npm  i thread-loader -D
+    2.接下去,哪个东西要进行多进程呢,就把thread-loader放过去.就可以启动多进程了.一般我们是给babel-loder用的,而使用多个loader,就得在配置中使用use:[]数组,所以看下面babel-loader中的相关配置.
 
 
+    3.注意:使用这个thread-loader多进程打包的话,是有利有弊的:你用好了,这个速度就杠杠提升;如果你没用好,那么速度就会非常慢,为什么呢?因为进程开启是需要时间的,启动时间大概为600ms.而且进程通信(比如说我要同时只干一件事情,我要干完了,我要告诉你这个事情我干完了,你再接着干什么什么东西)也有开销,需要花时间.所以,假设:一件事情只需要100ms,你却启用多进程,而多进程开启都需要600ms,有点得不偿失.所以只有这个工作需要长时间去使用,才需要多进程打包.->js中呢有一个eslint-loader,还有一个babel-loader.eslint只做语法检查:你要么错,要么不错.而babel-loader:需要编译啊,转换啊,所以消耗时间比较长,也是我们工作时间最长的一个loader.当然我们这个文件中,不加thread-loader比加了thread-loader webpack要打包的快,因为这里js文件很少.
+
+    4.当thread-loader一启动呢.会根据cpu盒数-1这样一个数量去启动进程.当然你也可以调整,如下面(得将hread-loader改成对象).
+-----------第八节:-------------------
+* externals:
+    1.作用:防止将我们的某些包打包到我们最终输出的bundle中:比如说我们这里的jquery,我们希望jquery是通过CDN链接给引用进来,这个时候我们就用externals将其禁止掉,也就是让其不会被打包,那么我们从CDN链接中去使用jquery.
  */
 const {
     resolve
@@ -174,30 +185,42 @@ module.exports = {
                 {
                     test: /\.js$/,
                     exclude: /node_modules/,
-                    loader: "babel-loader",
-                    options: {
-                        presets: [
-                            [
-                                "@babel/preset-env",
-                                {
-                                    useBuiltIns: "usage",
+                    use: [
+                        // 'thread-loader', //开启多进程打包
+                        { //调整thread-loader
+                            loader: 'thread-loader',
+                            options: { //配置
+                                workers: 2 //进程数为2个
+                            }
+                        },
+                        {
+                            loader: "babel-loader",
+                            options: {
+                                presets: [
+                                    [
+                                        "@babel/preset-env",
+                                        {
+                                            useBuiltIns: "usage",
 
-                                    corejs: {
-                                        version: 3
-                                    },
+                                            corejs: {
+                                                version: 3
+                                            },
 
-                                    targets: {
-                                        chrome: "60",
-                                        firefox: "60",
-                                        ie: "9",
-                                        safari: "10",
-                                        edge: "17"
-                                    }
-                                }
-                            ]
-                        ],
-                        cacheDirectory: true //开启babel缓存(第二次构件时,会读取之前的缓存,从而速度会更快)
-                    }
+                                            targets: {
+                                                chrome: "60",
+                                                firefox: "60",
+                                                ie: "9",
+                                                safari: "10",
+                                                edge: "17"
+                                            }
+                                        }
+                                    ]
+                                ],
+                                cacheDirectory: true //开启babel缓存(第二次构件时,会读取之前的缓存,从而速度会更快)
+                            }
+                        }
+                    ],
+
                 }
             ]
         }]
