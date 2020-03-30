@@ -59,10 +59,21 @@
     4.这里有一个注意点:就是对于不同的版本,tree shaking可能会有一点点差异.这个差异就是tree shaking可能会将/src/js/index.js中引入的css代码给干掉.比方说我们可以模拟一下测试:在package.json中配置"sideEffects"选项->"sideEffects":false(意思就是:所有代码都是没有副作用的,既所有代码都可以进行tree shaking).
         这个时候我们再webpack构建一次,我们会发现,输出的资源就没有CSS了.也就是说,这么写,可能会将css或者@babel,polifill等等资文件源干掉,因为这些资源我们都是引入,但是没有直接使用,所以有可能会被干掉.所以我们要修改一下"sideEffects":false这个写法.比如说我们不要干掉css文件,那么就要改成"sideEffects":["*.css"].
 
+-----------第四节:-------------------
+* code splite(代码分割):
+    1.作用:就是将我们打包生产的一个chunk,分割成多个文件.这样我们可以去实现各项功能.比如说,将一个大的文件分割成3个文件,那么我们加载的时候可以并行加载,从而速度更快.同时呢,分割成更多的文件,我们还可以"按需加载"的功能!!也就是我需要这个文件,我才加载这个文件,不需要用到就不加载.比如说我们开发的单页面应用的时候,我们整个页面是一个非常庞大的文件,那么我们肯定要按照路由去拆分一些文件,从而实现按需加载.那么如果你要拆分文件的话,你就可以使用webpack的这个技术,叫做代码分割:
+        首先,你需要将每个路由文件都拆分成单独的js文件,这样呢才能实现按需加载
+
+    2.方法:
+        * 方法一.根据入口文件(下面的module.exports/entry:[])就可以进行配置(多入口,之前都是单入口)
+            但是这里有一个问题,就是我们很难去指定多入口.比如说今天我们有2个入口,明天我们有3个入口.后天有4个...这样子改来改去就很麻烦,不太灵活.所以我们使用第二种配置方式
+        * 方法二. 
 
 
  */
-const { resolve } = require("path");
+const {
+    resolve
+} = require("path");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
@@ -71,125 +82,129 @@ const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 process.env.NODE_ENV = "production"; //这里应该要改为production了
 
 const commonCssLoader = [
-  MiniCssExtractPlugin.loader,
-  "css-loader",
-  {
-    loader: "postcss-loader",
-    options: {
-      ident: "postcss",
-      plugins: () => [require("postcss-preset-env")()]
+    MiniCssExtractPlugin.loader,
+    "css-loader",
+    {
+        loader: "postcss-loader",
+        options: {
+            ident: "postcss",
+            plugins: () => [require("postcss-preset-env")()]
+        }
     }
-  }
 ];
 
 module.exports = {
-  entry: ["./src/js/index.js", "./src/index.html"],
-  output: {
-    // filename: 'js/build.[hash:10].js', //资源缓存解决:文件名加入hash值
-    // filename: 'js/build.[chunkhash:10].js', //利用chunkhash值
-    filename: "js/build.[contenthash:10].js", //利用contenthash值
-    path: resolve(__dirname, "build")
-  },
-  module: {
-    rules: [
-      {
-        // { //eslint语法检查
-        //   test: /\.js$/,
-        //   exclude: /node_modules/,
-        //   loader: "eslint-loader",
-        //   enforce: 'pre',
-        //   options: {
-        //     fix: true
-        //   }
-        // },
-        oneOf: [
-          //以下loader只会匹配一个
-          {
-            test: /\.css$/,
-            use: [...commonCssLoader]
-          },
-          {
-            test: /\.less$/,
-            use: [...commonCssLoader, "less-loader"]
-          },
-          {
-            test: /\.(jpg|png|gif)$/,
-            loader: "url-loader",
-            options: {
-              limit: 8 * 1024,
-              esModule: false,
-              name: "[hash:10].[ext]",
-              outputPath: "imgs"
-            }
-          },
-          {
-            test: /\.html$/,
-            loader: "html-loader"
-          },
-          {
-            exclude: /\.(css|js|html|less|jpg|png|gif)$/,
-            loader: "file-loader",
-            options: {
-              name: "[hash:10].[ext]",
-              outputPath: "media"
-            }
-          },
-          {
-            test: /\.js$/,
-            exclude: /node_modules/,
-            loader: "babel-loader",
-            options: {
-              presets: [
-                [
-                  "@babel/preset-env",
-                  {
-                    useBuiltIns: "usage",
-
-                    corejs: {
-                      version: 3
-                    },
-
-                    targets: {
-                      chrome: "60",
-                      firefox: "60",
-                      ie: "9",
-                      safari: "10",
-                      edge: "17"
+    //   entry: ["./src/js/index.js"], //单入口
+    entry: {
+        //code splite按需加载方法一.多入口.因为是多入口了,所以要将之前的单入口时候,src/js/index.js中引入tree.js 这句话删去,不需要引入了.此时webpack打包,因为下面output:{ filename: "js/build.[contenthash:10].js"}输出的名字不好区别,所以我们将output中的filename的值改成js/[name].[contenthash:10].js.[name]会取文件名.比如说这里的index.js打包后[name]=main.print.js打包后,[name]=tree
+        main: "./src/js/index.js",
+        tree: "./src/js/print.js"
+    },
+    output: {
+        // filename: 'js/build.[hash:10].js', //资源缓存解决:文件名加入hash值
+        // filename: 'js/build.[chunkhash:10].js', //利用chunkhash值
+        // filename: "js/build.[contenthash:10].js", //利用contenthash值
+        filename: "js/[name].[contenthash:10].js", //[name]会取文件名
+        path: resolve(__dirname, "build")
+    },
+    module: {
+        rules: [{
+            // { //eslint语法检查
+            //   test: /\.js$/,
+            //   exclude: /node_modules/,
+            //   loader: "eslint-loader",
+            //   enforce: 'pre',
+            //   options: {
+            //     fix: true
+            //   }
+            // },
+            oneOf: [
+                //以下loader只会匹配一个
+                {
+                    test: /\.css$/,
+                    use: [...commonCssLoader]
+                },
+                {
+                    test: /\.less$/,
+                    use: [...commonCssLoader, "less-loader"]
+                },
+                {
+                    test: /\.(jpg|png|gif)$/,
+                    loader: "url-loader",
+                    options: {
+                        limit: 8 * 1024,
+                        esModule: false,
+                        name: "[hash:10].[ext]",
+                        outputPath: "imgs"
                     }
-                  }
-                ]
-              ],
-              cacheDirectory: true //开启babel缓存(第二次构件时,会读取之前的缓存,从而速度会更快)
+                },
+                {
+                    test: /\.html$/,
+                    loader: "html-loader"
+                },
+                {
+                    exclude: /\.(css|js|html|less|jpg|png|gif)$/,
+                    loader: "file-loader",
+                    options: {
+                        name: "[hash:10].[ext]",
+                        outputPath: "media"
+                    }
+                },
+                {
+                    test: /\.js$/,
+                    exclude: /node_modules/,
+                    loader: "babel-loader",
+                    options: {
+                        presets: [
+                            [
+                                "@babel/preset-env",
+                                {
+                                    useBuiltIns: "usage",
+
+                                    corejs: {
+                                        version: 3
+                                    },
+
+                                    targets: {
+                                        chrome: "60",
+                                        firefox: "60",
+                                        ie: "9",
+                                        safari: "10",
+                                        edge: "17"
+                                    }
+                                }
+                            ]
+                        ],
+                        cacheDirectory: true //开启babel缓存(第二次构件时,会读取之前的缓存,从而速度会更快)
+                    }
+                }
+            ]
+        }]
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: "./src/index.html",
+            minify: {
+                collapseWhitespace: true,
+                removeComments: true
             }
-          }
-        ]
-      }
-    ]
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: "./src/index.html",
-      minify: {
-        collapseWhitespace: true,
-        removeComments: true
-      }
-    }),
-    new MiniCssExtractPlugin({
-      // filename: "css/build.[hash:10].css" //资源缓存解决:文件名加入hash值
-      // filename: "css/build.[chunkhash:10].css" //利用chunkhash值
-      filename: "css/build.[contenthash:10].css" //利用contenthash值
-    }),
-    new OptimizeCssAssetsPlugin()
-  ],
+        }),
+        new MiniCssExtractPlugin({
+            // filename: "css/build.[hash:10].css" //资源缓存解决:文件名加入hash值
+            // filename: "css/build.[chunkhash:10].css" //利用chunkhash值
+            filename: "css/build.[contenthash:10].css" //利用contenthash值
+        }),
+        new OptimizeCssAssetsPlugin()
+    ],
 
-  mode: "production", //这里应该要改为production了
+    mode: "production", //这里应该要改为production了
 
-  devServer: {
-    contentBase: resolve(__dirname, "build"),
-    compress: true,
-    open: true,
-    port: 3000,
-    hot: true
-  },
-  devtool: "source-map"
+    devServer: {
+        contentBase: resolve(__dirname, "build"),
+        compress: true,
+        open: true,
+        port: 3000,
+        hot: true
+    },
+    devtool: "source-map"
 };
