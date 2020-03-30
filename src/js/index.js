@@ -52,7 +52,14 @@ console.log('index.js文件被懒加载了...');
  */
 document.getElementById('btn').onclick = function () {
   // import('./test').then(({
-  import( /* webpackChunkName:'aaa'*/ './test').then(({ //当然也可以更改构建名称.因为懒加载的前提条件就是先进行代码分割,将这个要加载的页面分割成单独的chunk文件,然后对这个chunk文件进行懒加载
+  // import( /* webpackChunkName:'aaa'*/ './test').then(({ //当然也可以更改构建名称.因为懒加载的前提条件就是先进行代码分割,将这个要加载的页面分割成单独的chunk文件,然后对这个chunk文件进行懒加载
+  import( /* webpackChunkName:'aaa' , webpackPrefetch:*/ true, './test').then(({
+    /*预加载:
+      1.在/ webpackChunkName:'aaa'后再加一个参数:webpackPrefetch:true就是预加载.
+      2.此时打包webpack,然后运行页面,可以看出:预加载就是页面一上来就加载了这个aaa.js文件,然后点击btn按钮,这个时候加载的js文件就是缓存中的aaa.js文件
+      3. 那么预加载有什么用呢?
+          浏览器正常加载文件可以认为是并行加载(同一时间加载多个文件,但是每次只能一起加载6个,7个等文件).而预加载的好处就是:等其他资源加载完毕了,等浏览器空闲了,再偷偷加载资源
+     */
     add
   }) => {
     console.log(add(4, 5))
