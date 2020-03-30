@@ -69,6 +69,9 @@
             但是这里有一个问题,就是我们很难去指定多入口.比如说今天我们有2个入口,明天我们有3个入口.后天有4个...这样子改来改去就很麻烦,不太灵活.所以我们使用第二种配置方式
         * 方法二. 直接使用webpakc提供的配置,optization:{},如下面(但是src/js/index.js还是得用import来引用要引入的js文件)
 
+        * 方法三.通过js代码,让某个文件单独打包成一个chunk:
+            这个方法,看src/js/index.js
+
 
  */
 const {
@@ -94,11 +97,11 @@ const commonCssLoader = [
 ];
 
 module.exports = {
-    // entry: ["./src/js/index.js"], //单入口
-    entry: { //code splite按需加载方法一.多入口.因为是多入口了,所以要将之前的单入口时候,src/js/index.js中引入tree.js 这句话删去,不需要引入了.此时webpack打包,因为下面output:{ filename: "js/build.[contenthash:10].js"}输出的名字不好区别,所以我们将output中的filename的值改成js/[name].[contenthash:10].js.[name]会取文件名.比如说这里的index.js打包后[name]=main.print.js打包后,[name]=tree
-        main: "./src/js/index.js",
-        tree: "./src/js/print.js"
-    },
+    entry: ["./src/js/index.js"], //单入口
+    // entry: { //code splite按需加载方法一.多入口.因为是多入口了,所以要将之前的单入口时候,src/js/index.js中引入tree.js 这句话删去,不需要引入了.此时webpack打包,因为下面output:{ filename: "js/build.[contenthash:10].js"}输出的名字不好区别,所以我们将output中的filename的值改成js/[name].[contenthash:10].js.[name]会取文件名.比如说这里的index.js打包后[name]=main.print.js打包后,[name]=tree
+    //     main: "./src/js/index.js",
+    //     tree: "./src/js/print.js"
+    // },
     output: {
         // filename: 'js/build.[hash:10].js', //资源缓存解决:文件名加入hash值
         // filename: 'js/build.[chunkhash:10].js', //利用chunkhash值
@@ -203,12 +206,14 @@ module.exports = {
       2.如果上面的上面的entry是多入口的话,那么也就会分别生成对应入口的chunk.但是在多入口文件print.js中也引入jquery:import $ from 'jquery',此时再进行打包,会发现,这2个多入口文件打包口的chunk共用node-modules打包后的jquery代码->也就是说:optization会自动分析多入口chunk中,有没有公共的文件.如果有,会将其打包成一个chunk.
       
       * 从上面的第二条可以看出,css splite并不是说只能选择方法1或者方法2,是要根据你的需求进行灵活选择,比如说用方法二,搭配单入口.或者是用方法二,搭配多入口.
+
+    *我们将来开发的时候,还是单页面应用比较多,多入口的话还是少一点的.但是如果我们使用单入口的话,只能做上面的第一件事情,就是只能单独打包node_modules为一个chunk,但是第二件事情就做不了了,既不能提取公共的文件.这时候该怎么办??通过第三种方式.
     */
-    "optization": {
-        spliteChunks: {
-            chunks: 'all'
-        }
-    },
+    // "optization": {
+    //     spliteChunks: {
+    //         chunks: 'all'
+    //     }
+    // },
 
 
     mode: "production", //这里应该要改为production了
