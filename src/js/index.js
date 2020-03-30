@@ -33,3 +33,28 @@ console.log(sum(1, 2, 3, 4));
 
 //测试树摇
 // console.log(mul(1, 2));
+
+
+// 测试懒加载
+console.log('index.js文件被懒加载了...');
+
+// 以下代码如何进行懒加载 ? ? ? ? - > 这里就使用之前学习的语法 : import动态导入语法
+// import {
+//   add
+// } from './test'
+// document.getElementById('btn').onClick = function () {
+//   console.log(add(4, 5));
+// }
+
+
+/*将上面的代码改为下面的,使用 import动态导入语法 ,实现懒加载~!:
+  下面这个方法感觉是跟一般的语法没什么区别~!是的,只是下面的方法是将import放在一个异步的回调函数中,这样的话,一上来onClick.function(){}方法不会立刻调用,不会调用呢,那么我的js文件就并不会被加载.只有等我点击了按钮之后,才会触发这个回调函数,才会真正的去加载这个test.js文件
+ */
+document.getElementById('btn').onclick = function () {
+  // import('./test').then(({
+  import( /* webpackChunkName:'aaa'*/ './test').then(({ //当然也可以更改构建名称.因为懒加载的前提条件就是先进行代码分割,将这个要加载的页面分割成单独的chunk文件,然后对这个chunk文件进行懒加载
+    add
+  }) => {
+    console.log(add(4, 5))
+  });
+}
