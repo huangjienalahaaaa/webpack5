@@ -103,6 +103,11 @@
 -----------第八节:-------------------
 * externals:
     1.作用:防止将我们的某些包打包到我们最终输出的bundle中:比如说我们这里的jquery,我们希望jquery是通过CDN链接给引用进来,这个时候我们就用externals将其禁止掉,也就是让其不会被打包,那么我们从CDN链接中去使用jquery.
+
+    2.使用方法:在webpack配置中,使用externals对象配置,如下面.
+
+    3.externals使用场景:将来要是有些包要使用CDN的方式,就在下面的externals配置中将这个包给拒绝打包掉,然后在index.html中手动将这个CDN链接加进来.
+
  */
 const {
     resolve
@@ -258,6 +263,10 @@ module.exports = {
     },
 
     mode: "production", //这里应该要改为production了
+    externals: { //externals选项
+        //拒绝jQuery被打包进来,记得在index.html中将jqury的CDN链接给引用进来(使用BootCDN:因为是免费的),然后webpack进行打包.然后运行,发现index.js这块相应测试代码是可以完成的
+        jquery: 'jQuery' //忽略的库名:npm下载的包名
+    },
 
     devServer: {
         contentBase: resolve(__dirname, "build"),
