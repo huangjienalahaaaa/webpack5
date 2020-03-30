@@ -25,9 +25,6 @@ console.log(promise);
 console.log('********');
 
 
-// js的HRM功能
-if (module.hot) { //如果module.hot=true,说明开启了HRM功能,此时我们要做的事情就是:让HRM功能代码生效
-  module.hot.accept('./print.js', function () { //意思是 这个方法会坚挺print.js文件的变化,一旦发生变化,其他模块不会打包构建,只会执行后面这个回调函数
-
-  })
+if (module.hot) {
+  module.hot.accept('./print.js', function () {})
 }
