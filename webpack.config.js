@@ -106,7 +106,7 @@
 
     2.使用方法:在webpack配置中,使用externals对象配置,如下面.
 
-    3.externals使用场景:将来要是有些包要使用CDN的方式,就在下面的externals配置中将这个包给拒绝打包掉,然后在index.html中手动将这个CDN链接加进来.
+    3.externals使用场景:将来要是有些包要使用CDN的方式(用过CDN引入肯定比用砸门自己地址要更快一些),就在下面的externals配置中将这个包给拒绝打包掉,然后在index.html中手动将这个CDN链接加进来.
 
  */
 const {
