@@ -44,142 +44,152 @@
 
          * 方法:就是将 js/css中的[hash:10]改为[contenthash值:10]即可!
 
+
+-----------第三节:-------------------
+* tree shaking(树摇):
+
+    1.作用:去除应用程序中,没有使用到的代码,这样可以使代码体积更小
+
+    2.前提:
+        1. 必须使用ES6模块化(js文件必须使用es6语句)
+        2. 开启production环境(这里已经让mode='production')
+
+    3.测试: 在js下新建tree.js,然后在index.js中引入tree中的其中一个方法.然后webpack进行构建一次,在构建生成的js文件中,可以看到,只引入了mul方法,count方法没有引入
+
+    4.这里有一个注意点:就是对于不同的版本,tree shaking可能会有一点点差异.这个差异就是tree shaking可能会将/src/js/index.js中引入的css代码给干掉.比方说我们可以模拟一下测试:在package.json中配置"sideEffects"选项->"sideEffects":false(意思就是:所有代码都是没有副作用的,既所有代码都可以进行tree shaking).
+        这个时候我们再webpack构建一次,我们会发现,输出的资源就没有CSS了.也就是说,这么写,可能会将css或者@babel,polifill等等资文件源干掉,因为这些资源我们都是引入,但是没有直接使用,所以有可能会被干掉.所以我们要修改一下"sideEffects":false这个写法.比如说我们不要干掉css文件,那么就要改成"sideEffects":["*.css"].
+
+
+
  */
-const {
-    resolve
-} = require("path");
+const { resolve } = require("path");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 
-
 process.env.NODE_ENV = "production"; //这里应该要改为production了
 
-
 const commonCssLoader = [
-    MiniCssExtractPlugin.loader,
-    "css-loader",
-    {
-        loader: "postcss-loader",
-        options: {
-            ident: "postcss",
-            plugins: () => [
-                require("postcss-preset-env")()
-            ]
-        }
+  MiniCssExtractPlugin.loader,
+  "css-loader",
+  {
+    loader: "postcss-loader",
+    options: {
+      ident: "postcss",
+      plugins: () => [require("postcss-preset-env")()]
     }
-]
+  }
+];
 
 module.exports = {
-    entry: ["./src/js/index.js", "./src/index.html"],
-    output: {
-        // filename: 'js/build.[hash:10].js', //资源缓存解决:文件名加入hash值
-        // filename: 'js/build.[chunkhash:10].js', //利用chunkhash值
-        filename: 'js/build.[contenthash:10].js', //利用contenthash值
-        path: resolve(__dirname, "build")
-    },
-    module: {
-        rules: [{
-            // { //eslint语法检查
-            //   test: /\.js$/,
-            //   exclude: /node_modules/,
-            //   loader: "eslint-loader",
-            //   enforce: 'pre', 
-            //   options: {
-            //     fix: true
-            //   }
-            // },
-            oneOf: [ //以下loader只会匹配一个
-                {
-                    test: /\.css$/,
-                    use: [...commonCssLoader]
-                },
-                {
-                    test: /\.less$/,
-                    use: [
-                        ...commonCssLoader,
-                        "less-loader"
-                    ]
-                },
-                {
-                    test: /\.(jpg|png|gif)$/,
-                    loader: "url-loader",
-                    options: {
-                        limit: 8 * 1024,
-                        esModule: false,
-                        name: "[hash:10].[ext]",
-                        outputPath: "imgs"
-                    }
-                },
-                {
-                    test: /\.html$/,
-                    loader: "html-loader"
-                },
-                {
-                    exclude: /\.(css|js|html|less|jpg|png|gif)$/,
-                    loader: "file-loader",
-                    options: {
-                        name: "[hash:10].[ext]",
-                        outputPath: "media"
-                    }
-                },
-                {
-                    test: /\.js$/,
-                    exclude: /node_modules/,
-                    loader: "babel-loader",
-                    options: {
-                        presets: [
-                            [
-                                "@babel/preset-env",
-                                {
-
-                                    useBuiltIns: "usage",
-
-                                    corejs: {
-                                        version: 3
-                                    },
-
-                                    targets: {
-                                        chrome: "60",
-                                        firefox: "60",
-                                        ie: "9",
-                                        safari: "10",
-                                        edge: "17"
-                                    }
-                                }
-                            ]
-                        ],
-                        cacheDirectory: true //开启babel缓存(第二次构件时,会读取之前的缓存,从而速度会更快)
-                    }
-                }
-            ]
-        }]
-    },
-    plugins: [
-        new HtmlWebpackPlugin({
-            template: "./src/index.html",
-            minify: {
-                collapseWhitespace: true,
-                removeComments: true
+  entry: ["./src/js/index.js", "./src/index.html"],
+  output: {
+    // filename: 'js/build.[hash:10].js', //资源缓存解决:文件名加入hash值
+    // filename: 'js/build.[chunkhash:10].js', //利用chunkhash值
+    filename: "js/build.[contenthash:10].js", //利用contenthash值
+    path: resolve(__dirname, "build")
+  },
+  module: {
+    rules: [
+      {
+        // { //eslint语法检查
+        //   test: /\.js$/,
+        //   exclude: /node_modules/,
+        //   loader: "eslint-loader",
+        //   enforce: 'pre',
+        //   options: {
+        //     fix: true
+        //   }
+        // },
+        oneOf: [
+          //以下loader只会匹配一个
+          {
+            test: /\.css$/,
+            use: [...commonCssLoader]
+          },
+          {
+            test: /\.less$/,
+            use: [...commonCssLoader, "less-loader"]
+          },
+          {
+            test: /\.(jpg|png|gif)$/,
+            loader: "url-loader",
+            options: {
+              limit: 8 * 1024,
+              esModule: false,
+              name: "[hash:10].[ext]",
+              outputPath: "imgs"
             }
-        }),
-        new MiniCssExtractPlugin({
-            // filename: "css/build.[hash:10].css" //资源缓存解决:文件名加入hash值
-            // filename: "css/build.[chunkhash:10].css" //利用chunkhash值
-            filename: "css/build.[contenthash:10].css" //利用contenthash值
-        }),
-        new OptimizeCssAssetsPlugin()
-    ],
+          },
+          {
+            test: /\.html$/,
+            loader: "html-loader"
+          },
+          {
+            exclude: /\.(css|js|html|less|jpg|png|gif)$/,
+            loader: "file-loader",
+            options: {
+              name: "[hash:10].[ext]",
+              outputPath: "media"
+            }
+          },
+          {
+            test: /\.js$/,
+            exclude: /node_modules/,
+            loader: "babel-loader",
+            options: {
+              presets: [
+                [
+                  "@babel/preset-env",
+                  {
+                    useBuiltIns: "usage",
 
-    mode: 'production', //这里应该要改为production了
+                    corejs: {
+                      version: 3
+                    },
 
-    devServer: {
-        contentBase: resolve(__dirname, "build"),
-        compress: true,
-        open: true,
-        port: 3000,
-        hot: true
-    },
-    devtool: 'source-map'
+                    targets: {
+                      chrome: "60",
+                      firefox: "60",
+                      ie: "9",
+                      safari: "10",
+                      edge: "17"
+                    }
+                  }
+                ]
+              ],
+              cacheDirectory: true //开启babel缓存(第二次构件时,会读取之前的缓存,从而速度会更快)
+            }
+          }
+        ]
+      }
+    ]
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./src/index.html",
+      minify: {
+        collapseWhitespace: true,
+        removeComments: true
+      }
+    }),
+    new MiniCssExtractPlugin({
+      // filename: "css/build.[hash:10].css" //资源缓存解决:文件名加入hash值
+      // filename: "css/build.[chunkhash:10].css" //利用chunkhash值
+      filename: "css/build.[contenthash:10].css" //利用contenthash值
+    }),
+    new OptimizeCssAssetsPlugin()
+  ],
+
+  mode: "production", //这里应该要改为production了
+
+  devServer: {
+    contentBase: resolve(__dirname, "build"),
+    compress: true,
+    open: true,
+    port: 3000,
+    hot: true
+  },
+  devtool: "source-map"
 };
