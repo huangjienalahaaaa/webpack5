@@ -1,6 +1,8 @@
 /* webpack配置详解
 ----------第一节------------
-webpack详细配置之module:
+webpack配置详解-resolve:
+
+    1.resoleve:是用来->解析模块的规则
 
  */
 const {
@@ -17,34 +19,32 @@ module.exports = {
     },
 
     module: {
-        rules: [
-            // 在这里写loader的配置
-            {
+        rules: [{
                 test: /\.css$/,
-                // 多个Loader用use
                 use: ['style-loader', 'css-loader']
-            },
-            {
-                test: /\.js$/,
-                //排除node_module下的js文件
-                exclude: /node_modules/,
-                //只检查src下的js文件
-                include: resolve(__dirname, "src"),
-                // 单个Loader可以直接用loader去写,然后在options来写这个loader的配置选项
-                loader: 'eslint-loader',
-                options: {},
-                //优先执行
-                enforce: 'pre', //值为'pre'表示优先执行,值为'post'表示延后执行.如果这个选项不写的话,就表示中间执行
-            },
-            {
-                //oneOf:以下配置只会生效一个
-                oneOf: []
             }
+
         ]
     },
-
-
-
     plugins: [new HtmlWebpackPlugin({})],
-    mode: "development"
+    mode: "development",
+    // 解析模块规则
+    resolve: {
+
+        alias: { //起别名->优点:可以简写路径.缺点:用这个方式写路径的时候,没有提示
+            $css: resolve(__dirname, 'src/css') //实例看:js/index.js中引入css文件
+        },
+
+
+        extensions: [ //配置省略文件路径的后缀名,默认是['.js','json'],所以我们在写js路径名的时候,可以省略不写这个后缀,现在比如说想要将引入的css文件,省略其后缀名,可以不写,就可以下面这么写.实例看:js/index.js中引入css文件
+            '.js', '.json', '.css'
+        ],
+
+
+        modules: [ //告诉webpack,解析模块的时候,应该去哪个目录去找.默认是去Node_modules中找,它会怎么去找呢?->它会先去当前目录去找有没有node_modules，没有呢就去上一层目录下去找，没有呢再去上一层，一直这么找下去．．．所以这样太麻烦了，所以我们可以通过绝对路径的方式，告诉他这个目录是在哪里，不需要这么一层层去找了，这样子解析速度会快一些，如下面：
+            resolve(__dirname, './node_modules')
+
+        ]
+
+    }
 };

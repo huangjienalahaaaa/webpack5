@@ -1,18 +1,5 @@
+html,
 body {
-  background-color: yellow;
-
-  display: flex;
-  backface-visibility: hidden;
-}
-
-.block {
-  width: 600px;
-  height: 200px;
-  background-color: red;
-}
-
-#btn {
-  width: 200px;
-  height: 200px;
-  background-color: teal;
+    height: 100%;
+    background-color: teal;
 }
