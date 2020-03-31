@@ -113,7 +113,15 @@
     1.作用:跟externals一样,会指示webpack,哪些库是不参与打包的.不同的是,dll会对单独的某些库进行单独打包,将多个库打包成一个chunk.
 
         那么它有什么意义呢?->在正常情况下,Node_modules中的库会被打包成一个chunk文件,但是我们的第三方库非常非常的多,如果全部打包成一个文件,那么这个文件的体积就会太大了.所以通过这个dill技术,我们可以将这些库拆开来,单独打包成不同的chunk,这样可以更加有利于我们性能的优化
-    2.要使用dill,就要在根目录下再新建一个配置文件,这个文件叫什么名都可以,这里我们让其叫做webpack.dll.js.然后请点进这个文件去看这个文件如何去写~!
+    2.要使用dll,就要在根目录下再新建一个配置文件,这个文件叫什么名都可以,这里我们让其叫做webpack.dll.js.然后请点进这个文件去看这个文件如何去写~!
+    3.配置完webpack.config.js文件后,这里先引入webpack包.
+      然后在webpack配置选项中的plugins数组中定义webpack.DllReferencePlugin
+
+
+    4.配置完上面的之后,使用webpack打包项目,在build/index.html中发现没有引入jqyery.既发现jquery真的不会被打包.那么jquery不被打包,jquery就没有啊,该怎么办呢?->这个时候我们还需要插件:
+        下载 npm install add-asset-html-webpack-plugin -D 
+        -> 这个插件有什么用呢? 这个插件会 "自动将某个文件打包输出去,并在html中自动引入该资源"
+        配置完这个插件之后,使用webpack打包项目,在build/index.html中发现就会引入jqyery,同时会将jquery.js单独打包过来(在build/jquery.js)
  */
 const {
     resolve
@@ -122,6 +130,11 @@ const {
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+
+//dll配置,引入webpack包
+const webpack = require("webpack");
+//dll配置,自动将某个文件打包输出去,并在html中自动引入该资源
+const AddAssetHtmlPlugin = require("add-asset-html-webpack-plugin");
 
 process.env.NODE_ENV = "production"; //这里应该要改为production了
 
@@ -198,9 +211,11 @@ module.exports = {
                     exclude: /node_modules/,
                     use: [
                         // 'thread-loader', //开启多进程打包
-                        { //调整thread-loader
-                            loader: 'thread-loader',
-                            options: { //配置
+                        {
+                            //调整thread-loader
+                            loader: "thread-loader",
+                            options: {
+                                //配置
                                 workers: 2 //进程数为2个
                             }
                         },
@@ -230,8 +245,7 @@ module.exports = {
                                 cacheDirectory: true //开启babel缓存(第二次构件时,会读取之前的缓存,从而速度会更快)
                             }
                         }
-                    ],
-
+                    ]
                 }
             ]
         }]
@@ -249,29 +263,36 @@ module.exports = {
             // filename: "css/build.[chunkhash:10].css" //利用chunkhash值
             filename: "css/build.[contenthash:10].css" //利用contenthash值
         }),
-        new OptimizeCssAssetsPlugin()
+        new OptimizeCssAssetsPlugin(),
+        new webpack.DllReferencePlugin({
+            //dll配置.告诉webpack哪些库不参与打包,同时使用时的名称也得变~!
+            manifest: resolve(__dirname, "dll/manifest.json")
+        }),
+        new AddAssetHtmlPlugin({
+            filepath: resolve(__dirname, 'dll/jquery.js')
+        })
     ],
 
-
     /*css splite方法二:
-      optization:
-      1.如果在src/js/index.js中引入jquery:import $ from 'jquery',那么webpack打包后,可以将node_modules中的代码,单独打包成一个chunk,最终输出.而上面的entry:'./src/js/index.js'我们也会将这个单入口文件打包成一个chunk
-      2.如果上面的上面的entry是多入口的话,那么也就会分别生成对应入口的chunk.但是在多入口文件print.js中也引入jquery:import $ from 'jquery',此时再进行打包,会发现,这2个多入口文件打包口的chunk共用node-modules打包后的jquery代码->也就是说:optization会自动分析多入口chunk中,有没有公共的文件.如果有,会将其打包成一个chunk.
-      
-      * 从上面的第二条可以看出,css splite并不是说只能选择方法1或者方法2,是要根据你的需求进行灵活选择,比如说用方法二,搭配单入口.或者是用方法二,搭配多入口.
+        optization:
+        1.如果在src/js/index.js中引入jquery:import $ from 'jquery',那么webpack打包后,可以将node_modules中的代码,单独打包成一个chunk,最终输出.而上面的entry:'./src/js/index.js'我们也会将这个单入口文件打包成一个chunk
+        2.如果上面的上面的entry是多入口的话,那么也就会分别生成对应入口的chunk.但是在多入口文件print.js中也引入jquery:import $ from 'jquery',此时再进行打包,会发现,这2个多入口文件打包口的chunk共用node-modules打包后的jquery代码->也就是说:optization会自动分析多入口chunk中,有没有公共的文件.如果有,会将其打包成一个chunk.
+        
+        * 从上面的第二条可以看出,css splite并不是说只能选择方法1或者方法2,是要根据你的需求进行灵活选择,比如说用方法二,搭配单入口.或者是用方法二,搭配多入口.
 
-    *我们将来开发的时候,还是单页面应用比较多,多入口的话还是少一点的.但是如果我们使用单入口的话,只能做上面的第一件事情,就是只能单独打包node_modules为一个chunk,但是第二件事情就做不了了,既不能提取公共的文件.这时候该怎么办??通过第三种方式.
-    */
+      *我们将来开发的时候,还是单页面应用比较多,多入口的话还是少一点的.但是如果我们使用单入口的话,只能做上面的第一件事情,就是只能单独打包node_modules为一个chunk,但是第二件事情就做不了了,既不能提取公共的文件.这时候该怎么办??通过第三种方式.
+      */
     optimization: {
         splitChunks: {
-            chunks: 'all'
+            chunks: "all"
         }
     },
 
     mode: "production", //这里应该要改为production了
-    externals: { //externals选项
+    externals: {
+        //externals选项
         //拒绝jQuery被打包进来,记得在index.html中将jqury的CDN链接给引用进来(使用BootCDN:因为是免费的),然后webpack进行打包.然后运行,发现index.js这块相应测试代码是可以完成的
-        jquery: 'jQuery' //忽略的库名:npm下载的包名
+        jquery: "jQuery" //忽略的库名:npm下载的包名
     },
 
     devServer: {
