@@ -73,5 +73,14 @@ npm install XXXXXX -D
 ### 优化 webpack 的打包构建速度:
 * oneOf
 * 缓存:
-  * babel缓存
-  * 文件资源缓存
+* babel缓存
+* 文件资源缓存
+* 多进程打包
+* externals
+* dll
+### 优化代码运行的性能
+* 缓存(hash-chunkhash-contenthash)
+* tree shaking
+* 懒加载/预加载
+* pwa
+
