@@ -15,7 +15,7 @@ const app = express();
 
 // 中间件:暴露出去build目录,时间有效期为是1个小时
 app.use(express.static('build', {
-    maxAge: 1000 * 3600
+   maxAge: 1000 * 3600
 }))
 console.log('biubiu123')
 

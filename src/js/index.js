@@ -3,8 +3,6 @@
 //   mul
 // } from "./tree";
 
-
-
 /*测试css splite方法三:通过js代码,让某个文件被单独打包成一个chunk:执行webpack命令后,会发现,index.js以及print.js都会被单独打包.index.js被打包成main.XXXX.js,print.js被打包成1.XXXX.js 
 
   * 也就是说这种方法是import动态导入语法:能将某个文件单独打包.

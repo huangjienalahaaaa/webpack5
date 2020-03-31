@@ -1,7 +1,7 @@
 /*
     1. 使用dll技术,对某些库(指第三方库:如jquery,vue,react...)进行单独打包.我们这里使用jquery为例
     2. 当你运行webpack时,默认查找的是webpack.config.js这个配置文件.而我们现在的需求是:需要运行webpack.dill.js文件:
-        所以我们运行指令要改,改成:webpack --config webpack.dill.js
+        所以我们运行指令要改,改成:webpack --config webpack.dll.js
 */
 const {
     resolve
