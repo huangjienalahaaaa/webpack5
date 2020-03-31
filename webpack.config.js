@@ -1,4 +1,6 @@
-/* 其他配置
+/* webpack配置详解
+----------第一节------------
+可以去webpack中文官网->文档->配置中看(https://www.webpackjs.com/configuration/)
  */
 const {
     resolve
