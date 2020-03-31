@@ -1,50 +1,7 @@
 /* webpack配置详解
 ----------第一节------------
-可以去webpack中文官网(因为对着文档开发,能接触到最新的东西)->文档->配置中看(https://www.webpackjs.com/configuration/)
+webpack详细配置之output:
 
-----------第二节------------
-webpack详细配置之entry(入口文件):
-
-* 1.string:
-
-    1.形式:  "./src/js/index.js"
-
-    2.特点:  所有文件全都打包生成一个chunk,输出一个bundle文件.此时chunk的默认名称叫做main.js(除非在output/filename设定输出名称)
-
-* 2.array:
-
-    1.形式:  ["./src/js/index.js", "./src/js/add.js"]
-
-    2.特点:  多入口,所有入口文件最终只会生成一个chunk文件,输出一个bundle文件.此时chunk的默认名称叫做main.js(如这个实例中,是将index.js和add.js打包成一个chunk,名字叫做main.js)
-
-    3.作用: 这种形式只有一种用法.就是之前做HRM功能的时候,html内容修改后不能热更新了,所以使用这种方法.
-
-* 3.object:
-
-    1.形式( key - value ):  
-            {
-                index: "./src/js/index.js",
-                add: "./src/js/add.js"
-            },
-
-    2.特点: 多入口,有几个文件就形成几个chunk,输出几个bundle文件.此时chunk的名称就是key值.
-
-
-* 通常情况下,我们第一种和第三种用的比较多,第二种是特殊情况下才会使用到的.
-
-4.特殊用法: 
-     1.形式( key - value ):  
-        { 
-            index: ["./src/js/index.js", "./src/js/count.js"], //这里是数组
-            add: "./src/js/add.js"
-        }
-
-    2.特点: 对于数组里的这2个文件,跟第二点是相同的,如这个实例中,是将index.js和count.js打包成一个chunk,名字叫做index.js,而add.js会单独打包,名字叫做add.js
-    3.这个用法我们在哪里看过呢?在之前的dill时候的webpack.dill.js文件里面:
-        entry{
-            jquery:['jquery'], //这里
-            // react:['react','react-dom','react-router-dom'] //所以以后我们可以使用这种方式,来打包react全家桶到同一个文件中
-        }
  */
 const {
     resolve
@@ -53,19 +10,34 @@ const {
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-    // entry: "./src/js/index.js", //1.string类型
-    // entry: ["./src/js/index.js", "./src/js/add.js"], //2.array类型
-    // entry: { //3.object类型
-    //     index: "./src/js/index.js",
-    //     add: "./src/js/add.js"
-    // },
-    entry: { //4.特熟用法
-        index: ["./src/js/index.js", "./src/js/count.js"], //这里是数组
-        add: "./src/js/add.js"
-    },
+    entry: "./src/js/index.js",
+
     output: {
-        filename: "[name].js", //使用默认名称
-        path: resolve(__dirname, "build")
+        //文件名称(指定目录名称/名称)
+        filename: "js/[name].js",
+        //输出文件目录路径(将来所有资源输出的公共目录.所以将来不管是css,图片等,都会输出到这个路径下面,具体是在这个路径的哪里,就看你对这个输出资源有没有进行额外的配置)
+        path: resolve(__dirname, "build"),
+
+        /*
+        
+        1. publicPath一般用于生产环境.所有资源引入公共路径的前缀(比如说将来我们有一个图片路径('imgs/a.jpg'),那么经过这个公共路径的处理,就会变为/imgs/a.jpg.如果你会一些服务器支持的话你就会知道:'/imgs/a.jpg'这样的方式,意思是"以当前的服务器地址去补充:去服务器的根目录下去找imgs文件夹,然后去找a.jpg.代码上线的时候我们更倾向与这种方式);而'imgs/a.jpg'这样的方式,意思是"当前路径下直接去找imgs文件夹,然后去找a.jpg".
+
+        2. 这种方式测试:
+        注释掉 下面的publicPath: '/'这句话,打包后,在html文件中:
+            <script src="js/main.js"></script> 
+            scr是以第二种方式引入文件的.
+        然后去掉注释之后,打包,发现:
+            <script src="/js/main.js"></script>
+             scr是以第一种方式引入文件的.
+        */
+        publicPath: '/',
+
+        /*chunkFilename:非入口chunk的文件名称:
+            1.那么什么是入口chunk呢? 就是前面entry指定的文件( entry: "./src/js/index.js",)就叫做入口chunk
+            2.那么怎么样才是非入口的chunk呢?->有2种:
+                
+         */
+        chunkFilename: '[name]_chunk.js'
     },
     plugins: [
         new HtmlWebpackPlugin({})
