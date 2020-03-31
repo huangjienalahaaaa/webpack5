@@ -5,7 +5,7 @@ tag v2.0:开发环境相关配置
 tag v3.0:生产环境相关配置以及开发环境的优化
 tag v4.0:生产环境优化
 tag v5.0:webpack配置详解-entry
-tag v5.0:webpack配置详解-output
+tag v6.0:webpack配置详解-output
 
 
 
