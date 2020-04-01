@@ -4,10 +4,11 @@ tag v1.0:学习相关配置
 tag v2.0:开发环境相关配置
 tag v3.0:生产环境相关配置以及开发环境的优化
 tag v4.0:生产环境优化
-tag v5.0:webpack配置详解-entry
-tag v6.0:webpack配置详解-output
-tag v7.0:webpack配置详解-module
-tag v8.0:webpack配置详解-resolve
+tag v5.0:webpack 配置详解-entry
+tag v6.0:webpack 配置详解-output
+tag v7.0:webpack 配置详解-module
+tag v8.0:webpack 配置详解-resolve
+tag v9.0:webpack 配置详解-devServer
 
 # 2.安装开发环境所需依赖:
 
@@ -74,16 +75,18 @@ npm install XXXXXX -D
 - 优化代码运行的性能
 
 ### 优化 webpack 的打包构建速度:
-* oneOf
-* 缓存:
-* babel缓存
-* 文件资源缓存
-* 多进程打包
-* externals
-* dll
-### 优化代码运行的性能
-* 缓存(hash-chunkhash-contenthash)
-* tree shaking
-* 懒加载/预加载
-* pwa
 
+- oneOf
+- 缓存:
+- babel 缓存
+- 文件资源缓存
+- 多进程打包
+- externals
+- dll
+
+### 优化代码运行的性能
+
+- 缓存(hash-chunkhash-contenthash)
+- tree shaking
+- 懒加载/预加载
+- pwa

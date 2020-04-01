@@ -1,8 +1,7 @@
 /* webpack配置详解
 ----------第一节------------
-webpack配置详解-resolve:
+webpack 配置详解-devServer
 
-    1.resoleve:是用来->解析模块的规则
 
  */
 const {
@@ -28,23 +27,41 @@ module.exports = {
     },
     plugins: [new HtmlWebpackPlugin({})],
     mode: "development",
-    // 解析模块规则
-    resolve: {
-
-        alias: { //起别名->优点:可以简写路径.缺点:用这个方式写路径的时候,没有提示
-            $css: resolve(__dirname, 'src/css') //实例看:js/index.js中引入css文件
+    devServer: {
+        //运行代码的目录
+        contentBase: resolve(__dirname, 'build'),
+        // 监视contentBase目录下的所有文件， 一旦文件变化就会reload
+        watchContentBase: true,
+        watchOptions: {
+            //监视文件的时候，忽略一些文件
+            ignored: /node_modules/
         },
-
-
-        extensions: [ //配置省略文件路径的后缀名,默认是['.js','json'],所以我们在写js路径名的时候,可以省略不写这个后缀,现在比如说想要将引入的css文件,省略其后缀名,可以不写,就可以下面这么写.实例看:js/index.js中引入css文件
-            '.js', '.json', '.css'
-        ],
-
-
-        modules: [ //告诉webpack,解析模块的时候,应该去哪个目录去找.默认是去Node_modules中找,它会怎么去找呢?->它会先去当前目录去找有没有node_modules，没有呢就去上一层目录下去找，没有呢再去上一层，一直这么找下去．．．所以这样太麻烦了，所以我们可以通过绝对路径的方式，告诉他这个目录是在哪里，不需要这么一层层去找了，这样子解析速度会快一些，如下面：
-            resolve(__dirname, './node_modules')
-
-        ]
-
+        // 启动gzip压缩
+        compress: true,
+        // 端口号
+        port: 5000,
+        // 域名
+        host: 'localhost',
+        // 自动打开浏览器
+        open: true,
+        // 开启HMR功能
+        hot: true,
+        // 当webpack-dev-server启动的时候，终端会输出webpack的各个步骤，这是我们不需要的。所以clientLogLevel的作用：不要显示启动服务器日志信息
+        clientLogLevel: 'none',
+        // 这个参数和clientLogLevel类似，所以作用是：除了一些基本启动信息之外，其他内容都不要显示
+        quiet: true,
+        // 如果出错了，不要全屏提示
+        overlay: false,
+        // 服务器你代理－>解决开发环境跨域问题
+        // proxy: {
+        //     // 一旦devServer(5000) 服务器接受到 / api / xxx的请求， 就会把请求转发到另一个服务器（ 3000）
+        //     '/api': {
+        //         target: 'http://localhost:3000',
+        //         //发送请求时，请求路径重写：将/api/xxx -> /xxx (去掉/api)
+        //         pathRewrite: {
+        //             '^/api': ''
+        //         }
+        //     }
+        // }
     }
 };
