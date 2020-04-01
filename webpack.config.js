@@ -1,6 +1,6 @@
 /* webpack配置详解
 ----------第一节------------
-webpack 配置详解-devServer
+webpack 配置详解-optimization
 
 
  */
@@ -26,42 +26,40 @@ module.exports = {
         ]
     },
     plugins: [new HtmlWebpackPlugin({})],
-    mode: "development",
-    devServer: {
-        //运行代码的目录
-        contentBase: resolve(__dirname, 'build'),
-        // 监视contentBase目录下的所有文件， 一旦文件变化就会reload
-        watchContentBase: true,
-        watchOptions: {
-            //监视文件的时候，忽略一些文件
-            ignored: /node_modules/
-        },
-        // 启动gzip压缩
-        compress: true,
-        // 端口号
-        port: 5000,
-        // 域名
-        host: 'localhost',
-        // 自动打开浏览器
-        open: true,
-        // 开启HMR功能
-        hot: true,
-        // 当webpack-dev-server启动的时候，终端会输出webpack的各个步骤，这是我们不需要的。所以clientLogLevel的作用：不要显示启动服务器日志信息
-        clientLogLevel: 'none',
-        // 这个参数和clientLogLevel类似，所以作用是：除了一些基本启动信息之外，其他内容都不要显示
-        quiet: true,
-        // 如果出错了，不要全屏提示
-        overlay: false,
-        // 服务器你代理－>解决开发环境跨域问题
-        // proxy: {
-        //     // 一旦devServer(5000) 服务器接受到 / api / xxx的请求， 就会把请求转发到另一个服务器（ 3000）
-        //     '/api': {
-        //         target: 'http://localhost:3000',
-        //         //发送请求时，请求路径重写：将/api/xxx -> /xxx (去掉/api)
-        //         pathRewrite: {
-        //             '^/api': ''
-        //         }
-        //     }
-        // }
+    mode: "production", //optimization必须在生产环境下才有意义
+    /*
+        1.可以将node_modules中代码单独打包一个chunk最终输出
+        ２．自动分析多入口chunk中，有没有公共的文件。如果有，会打包成一个单独的chunk
+    */
+
+    optimization: {
+        splitChunks: { //是用来做代码分割的
+            chunks: 'all',
+            minSize: 30 * 1024, //分割的chunk最小为30kb
+            maxSize: 0, //最大没有限制
+            minChunks: 1, //要提取的chunk最少被引用１次
+            maxAsyncRequests: 5, //按需加载时并行加载的数量的最大数量
+            maxInitialRequests: 3, //入口js文件最大并行请求数量
+            automaticNameDelimiter: '~', //名称连接符
+            name: true, //可以使用命名规则
+            cacheGroups: { //分割chunk的组
+                // node_modules文件会被打包到vendors组的chunk中。－－> vendors~xxx.js
+                // 满足上面的公共规则，如：大小超过30kb，至少被引用一次
+                vendors: {
+                    test: /[\\/][node_modules][\\/]/,
+                    // 优先级
+                    priority: -10
+                },
+                default: {
+                    //要提取的chunk最少被引用２次
+                    minChunks: 2,
+                    // 优先级
+                    priority: -20,
+                    // 如果当前要打包的模块，和之前已经被提取的模块是同一个，就会复用，而不是重新打包哦模块
+                    reuseExistingChunk: true
+                }
+
+            }
+        }
     }
 };

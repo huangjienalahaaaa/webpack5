@@ -11,6 +11,7 @@ tag v6.0:webpack 配置详解-output
 tag v7.0:webpack 配置详解-module
 tag v8.0:webpack 配置详解-resolve
 tag v9.0:webpack 配置详解-devServer
+tag v10.0:webpack 配置详解-optimization
 
 # 2.安装开发环境所需依赖:
 
